@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: python3.9
+    MemorySize: 128
+    Timeout: 10
+
+Resources:
+  S3FileUploaderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/upload.lambda_handler
+      Description: A lambda handler that uploads a file to an S3 bucket based on an API Gateway trigger.
+      Events:
+        S3FileUploaderApiEvent:
+          Type: Api
+          Properties:
+            Path: /file
+            Method: POST
+      Environment:
+        Variables:
+          FILE_UPLOAD_BUCKET_NAME: "s3-crud-bucket"
+      Policies:
+        - S3CrudPolicy:
+            BucketName: "s3-crud-bucket"
+
+  S3FileGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/get.lambda_handler
+      Description: A lambda handler that retrieves a file from an S3 bucket based on an API Gateway trigger.
+      Events:
+        S3FileGetApiEvent:
+          Type: Api
+          Properties:
+            Path: /file/{fileKey}
+            Method: GET
+      Environment:
+        Variables:
+          FILE_UPLOAD_BUCKET_NAME: "s3-crud-bucket"
+      Policies:
+        - S3ReadPolicy:
+            BucketName: "s3-crud-bucket"
+
+  S3FileDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/delete.lambda_handler
+      Description: A lambda handler that deletes a file from an S3 bucket based on an API Gateway trigger.
+      Events:
+        S3FileDeleteApiEvent:
+          Type: Api
+          Properties:
+            Path: /file/{fileKey}
+            Method: DELETE
+      Environment:
+        Variables:
+          FILE_UPLOAD_BUCKET_NAME: "s3-crud-bucket"
+      Policies:
+        - S3CrudPolicy:
+            BucketName: "s3-crud-bucket"
